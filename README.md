@@ -1,10 +1,8 @@
-# Crossterm | crossplatform terminal library written in rust.
+# Crossterm | Cross-platform terminal library written in rust.
 
-Ever got disappointed when a terminal library for rust was only written for unix systems? Crossterm provides the same core functionalities for both windows and unix systems. 
+Crossterm provides the same core functionalities for both windows and unix systems. 
 
-Crossterm aims to be simple and easy to call in code. True the simplicity of crossterm you do not have to worry about the platform your working with. You can just call the action you want to preform and unther water it will check what to do based on the current platform.
-
-Currently working on the alternatescreen and raw terminal features.
+Currently working on the alternate screen and raw terminal features.
 
 ## Getting Started
 
@@ -15,7 +13,6 @@ Add the crossterm package to your `Cargo.toml` file.
 ```
 [dependencies]
 crossterm = "*"
-
 ```
 
 Add the crate to your solution.
@@ -207,14 +204,14 @@ If you have used this library for an terminal other than the above list without 
     
 ## How it works
 
-Crossterm is using `WINAPI` for windows systems and `ANSI escape codes` for unix systems. Crossterm provides one base trait with can be implemented for a platform specific instance. For example, there is an implementation for windows (`WINAPI`) and unix(`ANSI`) for the `cursor module`. To call the platform specific implementation there is one module that rules them all. Thrue this module the client calls some action and the module will deside what to do based on the current platform. And it will execute that action.
+Crossterm is using `WINAPI` for windows systems and `ANSI escape codes` for unix systems. Crossterm provides one base trait with can be implemented for a platform specific instance. For example, there is an implementation for windows (`WINAPI`) and unix(`ANSI`) for the `cursor module`. To call the platform specific implementation there is one module that rules them all. Through this module the client calls some action and the module will decide what to do based on the current platform. And it will execute that action.
 
 ## Notice 
-This library is going to have api braking changes in the next release I realy wanted to work arround that but it was nessisairly for some of the futures for crossterm for example the alternate screen, raw terminal mode and managing the state of the terminal when action are performed with this crate. But upgrading to the new version would not be an whole effort. In the update file I will exactly descrtibe what to change. 
+This library is going to have api braking changes in the next release I really wanted to work around that but it was necessarily for some of the futures for crossterm for example the alternate screen, raw terminal mode and managing the state of the terminal when action are performed with this crate. But upgrading to the new version would not be an whole effort. In the update file I will exactly describe what to change. 
 
 ## Todo
 
-- This library does not support any kind of raw terminal. When an terminal changes some core state of the terminal this state should be revered when the process ends from this library. Currently there are not made any changed to the core state of the terminal with this library. But when some fearures in the furure will be inplemented this will be the case. So there should come an kind of raw state for the terminal and reversable options to redo all the changes made to the core state when the process ends. More information can be found at this [thread](https://www.reddit.com/r/rust/comments/7tg6n2/looking_for_feedback_onmy_cross_platform_terminal/dtf4ilo/)
+- This library does not support any kind of raw terminal. When an terminal changes some core state of the terminal this state should be revered when the process ends from this library. Currently there are not made any changed to the core state of the terminal with this library. But when some features in the future will be implemented this will be the case. So there should come an kind of raw state for the terminal and reversible options to redo all the changes made to the core state when the process ends. More information can be found at this [thread](https://www.reddit.com/r/rust/comments/7tg6n2/looking_for_feedback_onmy_cross_platform_terminal/dtf4ilo/)
 
 - Handling mouse events 
 - Handling key events
@@ -222,7 +219,7 @@ This library is going to have api braking changes in the next release I realy wa
 
 ## Contributing
 
-If you would like to contribute to crossterm, than please design the code as it is now. Each module contains the same structures so we can easely extend to multible platforms. As you study the code you will quiqly see what the architecture is. Maybe later there will be an documentation for how crossterm is design.
+If you would like to contribute to crossterm, than please design the code as it is now. Each module contains the same structures so we can easely extend to multible platforms. As you study the code you will quickly see what the architecture is. Maybe later there will be an documentation for how crossterm is design.
 
 ## Versioning
 
