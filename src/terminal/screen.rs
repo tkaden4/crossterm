@@ -1,16 +1,15 @@
 //! This module contains all the logic for switching between alternate screen and main screen.
 
 use shared::functions;
-use Context;
 use state::commands::*;
+use Context;
 
-use std::{ fmt, ops };
 use std::io::{self, Write};
+use std::{fmt, ops};
 
 pub struct ToMainScreen;
 
-impl fmt::Display for ToMainScreen
-{
+impl fmt::Display for ToMainScreen {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         get_to_alternate_screen_command().undo();
         Ok(())
@@ -20,8 +19,7 @@ impl fmt::Display for ToMainScreen
 /// Struct that switches to alternate screen buffer on display.
 pub struct ToAlternateScreen;
 
-impl fmt::Display for ToAlternateScreen
-{
+impl fmt::Display for ToAlternateScreen {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         get_to_alternate_screen_command().execute();
         Ok(())
@@ -54,13 +52,16 @@ impl fmt::Display for ToAlternateScreen
 pub struct AlternateScreen<W: Write> {
     /// The output target.
     output: W,
-    context: Context
+    context: Context,
 }
 
-impl<W: Write>  AlternateScreen<W> {
+impl<W: Write> AlternateScreen<W> {
     pub fn from(mut output: W) -> Self {
         write!(output, "{}", ToAlternateScreen);
-        AlternateScreen { output: output, context: Context::new()}
+        AlternateScreen {
+            output: output,
+            context: Context::new(),
+        }
     }
 }
 
@@ -88,22 +89,22 @@ impl<W: Write> Write for AlternateScreen<W> {
     }
 }
 
-impl<W: Write> Drop for AlternateScreen<W>
-{
-    fn drop(&mut self)
-    {
+impl<W: Write> Drop for AlternateScreen<W> {
+    fn drop(&mut self) {
         write!(self, "{}", ToMainScreen).expect("switch to main screen");
     }
 }
 
 /// Get the alternate screen command to enable and disable alternate screen based on the current platform
-fn get_to_alternate_screen_command() -> Box<ICommand>
-{
+fn get_to_alternate_screen_command() -> Box<ICommand> {
     #[cfg(target_os = "windows")]
-    let command = functions::get_module::<Box<ICommand>>(win_commands::ToAlternateScreenBufferCommand::new(), shared_commands::ToAlternateScreenBufferCommand::new()).unwrap();
+    let command = functions::get_module::<Box<ICommand>>(
+        win_commands::ToAlternateScreenBufferCommand::new(),
+        shared_commands::ToAlternateScreenBufferCommand::new(),
+    ).unwrap();
 
     #[cfg(not(target_os = "windows"))]
     let command = shared_commands::ToAlternateScreenBufferCommand::new();
-    
+
     command
 }

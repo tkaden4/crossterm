@@ -1,8 +1,8 @@
-use Construct;
+use super::super::{Color, ColorType};
 use super::ITerminalColor;
-use super::super::{ColorType, Color};
-use winapi::um::wincon;
 use kernel::windows_kernel::kernel;
+use winapi::um::wincon;
+use Construct;
 
 /// This struct is an windows implementation for color related actions.
 #[derive(Debug)]
@@ -19,7 +19,6 @@ impl Construct for WinApiColor {
 }
 
 impl ITerminalColor for WinApiColor {
-
     fn set_fg(&self, fg_color: Color) {
         let color_value = &self.color_value(fg_color, ColorType::Foreground);
 
@@ -67,7 +66,6 @@ impl ITerminalColor for WinApiColor {
 
     /// This will get the winapi color value from the Color and ColorType struct
     fn color_value(&self, color: Color, color_type: ColorType) -> String {
-
         use style::{Color, ColorType};
 
         let winapi_color: u16;

@@ -15,17 +15,19 @@ pub struct TerminalCursor {
     terminal_cursor: Option<Box<ITerminalCursor>>,
 }
 
-impl TerminalCursor
-{
+impl TerminalCursor {
     /// Create new cursor instance whereon cursor related actions can be performed.
     pub fn new() -> TerminalCursor {
         #[cfg(target_os = "windows")]
-        let cursor = functions::get_module::<Box<ITerminalCursor>>(WinApiCursor::new(), AnsiCursor::new());
+        let cursor =
+            functions::get_module::<Box<ITerminalCursor>>(WinApiCursor::new(), AnsiCursor::new());
 
         #[cfg(not(target_os = "windows"))]
         let cursor = Some(AnsiCursor::new() as Box<ITerminalCursor>);
 
-        TerminalCursor { terminal_cursor: cursor }
+        TerminalCursor {
+            terminal_cursor: cursor,
+        }
     }
 
     /// Goto some position (x,y) in the terminal.
@@ -39,7 +41,7 @@ impl TerminalCursor
     /// use self::crossterm::cursor;
     ///     
     /// cursor::cursor().goto(10,10);
-    /// 
+    ///
     /// ```
     pub fn goto(&mut self, x: u16, y: u16) -> &mut TerminalCursor {
         if let Some(ref terminal_cursor) = self.terminal_cursor {
@@ -60,7 +62,7 @@ impl TerminalCursor
     ///          
     /// let pos = cursor::cursor().pos();
     /// println!("{:?}", pos);
-    /// 
+    ///
     /// ```
     pub fn pos(&mut self) -> (u16, u16) {
         if let Some(ref terminal_cursor) = self.terminal_cursor {
@@ -75,17 +77,17 @@ impl TerminalCursor
     /// #Example
     ///
     /// ```rust
-    /// 
+    ///
     /// extern crate crossterm;
     ///
     /// use self::crossterm::cursor;
     ///      
     /// // Move 1 time up
     /// cursor::cursor().move_up(1);
-    /// 
+    ///
     /// // Move 2 times up
     /// cursor::cursor().move_up(2);
-    /// 
+    ///
     /// ```
     pub fn move_up(&mut self, count: u16) -> &mut TerminalCursor {
         if let Some(ref terminal_cursor) = self.terminal_cursor {
@@ -107,10 +109,10 @@ impl TerminalCursor
     ///
     /// // move 1 time right
     /// cursor::cursor().move_right(1);
-    /// 
+    ///
     /// // move 2 times right
     /// cursor::cursor().move_right(2);
-    /// 
+    ///
     /// ```
     pub fn move_right(&mut self, count: u16) -> &mut TerminalCursor {
         if let Some(ref terminal_cursor) = self.terminal_cursor {
@@ -128,10 +130,10 @@ impl TerminalCursor
     /// extern crate crossterm;
     ///
     /// use self::crossterm::cursor;
-    /// 
-    /// // move 1 time down 
+    ///
+    /// // move 1 time down
     /// cursor::cursor().move_down(1);
-    /// 
+    ///
     /// // move 2 times down
     /// cursor::cursor().move_down(2);
     ///
@@ -155,10 +157,10 @@ impl TerminalCursor
     ///
     /// // move 1 time left
     /// cursor::cursor().move_left(1);
-    /// 
+    ///
     /// // move 2 time left
     /// cursor::cursor().move_left(2);
-    /// 
+    ///
     /// ```
     pub fn move_left(&mut self, count: u16) -> &mut TerminalCursor {
         if let Some(ref terminal_cursor) = self.terminal_cursor {
@@ -169,9 +171,9 @@ impl TerminalCursor
 
     /// Print an value at the current cursor position.
     ///
-    /// This method prints an value with `print!()` and clears the buffer afterwards. 
+    /// This method prints an value with `print!()` and clears the buffer afterwards.
     /// Rust's standard output is line-buffered. So your text gets sent to the console one line at a time.
-    /// If you set the curosr position and try to `print!()` at that position and do not clear the buffer, than the character will not be printed at that position. 
+    /// If you set the curosr position and try to `print!()` at that position and do not clear the buffer, than the character will not be printed at that position.
     /// But will be printed when the next `println()` will be done.
     ///
     /// With this method you can print any displayable value at a certain position and the output buffer will be cleared afterwards.
@@ -192,18 +194,18 @@ impl TerminalCursor
     /// cursor::cursor().goto(10,10);
     /// print!("@");
     /// std::io::stdout().flush();
-    /// 
+    ///
     /// // but now we can chain the methods so it looks cleaner and it automatically flushes the buffer.  
     /// cursor::cursor()
     /// .goto(10,10)
     /// .print("@");
-    /// 
+    ///
     /// ```
     pub fn print<D: Display>(&mut self, value: D) -> &mut TerminalCursor {
         print!("{}", value);
         use std;
         use std::io::Write;
-        // rust is line buffered so we need to flush the buffer in order to print it at the current cursor position. 
+        // rust is line buffered so we need to flush the buffer in order to print it at the current cursor position.
         std::io::stdout().flush();
         self
     }
@@ -223,8 +225,7 @@ impl TerminalCursor
     /// cursor::cursor().safe_position();
     ///
     /// ```
-    pub fn save_position(&mut self)
-    {
+    pub fn save_position(&mut self) {
         if let Some(ref mut terminal_cursor) = self.terminal_cursor {
             terminal_cursor.save_position();
         }
@@ -245,8 +246,7 @@ impl TerminalCursor
     /// cursor().reset_position();
     ///
     /// ```
-    pub fn reset_position(&mut self)
-    {
+    pub fn reset_position(&mut self) {
         if let Some(ref terminal_cursor) = self.terminal_cursor {
             terminal_cursor.reset_position();
         }
@@ -256,7 +256,7 @@ impl TerminalCursor
 /// Get an TerminalCursor implementation whereon cursor related actions can be performed.
 ///
 /// Check `/examples/cursor` in the libary for more spesific examples.
-/// 
+///
 /// #Example
 ///
 /// ```rust
@@ -264,7 +264,7 @@ impl TerminalCursor
 /// extern crate crossterm;
 ///
 /// use self::crossterm::cursor;
-/// 
+///
 /// // Get cursor and goto pos X: 5, Y: 10
 /// let mut cursor = cursor::cursor();
 /// cursor.goto(5,10);

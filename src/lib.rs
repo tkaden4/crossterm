@@ -12,14 +12,14 @@ pub mod cursor;
 pub mod style;
 pub mod terminal;
 
-use shared::traits::{Construct};
-pub use state::{ Context};
+use shared::traits::Construct;
+pub use state::Context;
 
-#[cfg(windows)]
-extern crate winapi;
 #[cfg(unix)]
 extern crate libc;
 #[cfg(unix)]
 extern crate termios;
+#[cfg(windows)]
+extern crate winapi;
 
 extern crate rand;

@@ -1,11 +1,11 @@
 //! This is an ANSI specific implementation for cursor related action.
 //! This module is used for windows 10 terminals and unix terminals by default.
 
-use Construct;
-use shared::functions;
 use super::ITerminalCursor;
+use shared::functions;
+use Construct;
 
-use std::io::{ self, Write };
+use std::io::{self, Write};
 
 /// This struct is an ansi implementation for cursor related actions.
 pub struct AnsiCursor;
@@ -20,7 +20,7 @@ impl ITerminalCursor for AnsiCursor {
     fn goto(&self, x: u16, y: u16) {
         let mut some_writer = io::stdout();
         // ANSI codes are one-based. I want 0 based so we just need to increment and x,y.
-        write!(&mut some_writer, csi!("{};{}H"), y + 1, x +1);
+        write!(&mut some_writer, csi!("{};{}H"), y + 1, x + 1);
     }
 
     fn pos(&self) -> (u16, u16) {
@@ -28,7 +28,6 @@ impl ITerminalCursor for AnsiCursor {
     }
 
     fn move_up(&self, count: u16) {
-
         let mut some_writer = io::stdout();
         write!(&mut some_writer, csi!("{}A"), count);
     }
@@ -40,7 +39,7 @@ impl ITerminalCursor for AnsiCursor {
 
     fn move_down(&self, count: u16) {
         let mut some_writer = io::stdout();
-        write!(&mut some_writer, csi!("{}B"), count); 
+        write!(&mut some_writer, csi!("{}B"), count);
     }
 
     fn move_left(&self, count: u16) {
@@ -48,14 +47,12 @@ impl ITerminalCursor for AnsiCursor {
         write!(&mut some_writer, csi!("{}D"), count);
     }
 
-    fn save_position(&mut self)
-    {
+    fn save_position(&mut self) {
         let mut some_writer = io::stdout();
         write!(&mut some_writer, csi!("s"));
     }
 
-    fn reset_position(&self)
-    {
+    fn reset_position(&self) {
         let mut some_writer = io::stdout();
         write!(&mut some_writer, csi!("u"));
     }

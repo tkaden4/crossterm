@@ -8,16 +8,16 @@
 //! so that the cursor related actions can be preformed on both unix and windows systems.
 //!
 
+mod ansi_cursor;
 mod cursor;
 #[cfg(target_os = "windows")]
 mod winapi_cursor;
-mod ansi_cursor;
 
+use self::ansi_cursor::AnsiCursor;
 #[cfg(target_os = "windows")]
 use self::winapi_cursor::WinApiCursor;
-use self::ansi_cursor::AnsiCursor;
 
-pub use self::cursor::{ cursor, TerminalCursor };
+pub use self::cursor::{cursor, TerminalCursor};
 
 ///! This trait defines the actions that can be preformed with the terminal cursor.
 ///! This trait can be implemented so that an concrete implementation of the ITerminalCursor can forfill

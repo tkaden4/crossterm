@@ -7,18 +7,18 @@
 
 mod terminal;
 
+mod ansi_terminal;
 #[cfg(target_os = "windows")]
 mod winapi_terminal;
-mod ansi_terminal;
 
-mod screen;
 mod raw;
+mod screen;
 
+use self::ansi_terminal::AnsiTerminal;
 #[cfg(target_os = "windows")]
 use self::winapi_terminal::WinApiTerminal;
-use self::ansi_terminal::AnsiTerminal;
 
-pub use self::terminal::{ Terminal, terminal};
+pub use self::terminal::{terminal, Terminal};
 
 /// Enum that can be used for the kind of clearing that can be done in the terminal.
 pub enum ClearType {
@@ -47,5 +47,5 @@ pub trait ITerminal {
     /// Scroll `n` lines down in the current terminal.
     fn scroll_down(&self, count: i16);
     /// Resize terminal to the given width and height.
-    fn set_size(&self,width: i16, height: i16);
+    fn set_size(&self, width: i16, height: i16);
 }

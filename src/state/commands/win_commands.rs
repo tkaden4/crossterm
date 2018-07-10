@@ -1,71 +1,62 @@
 //! This module contains the commands that can be used for windows systems.
 
-use super::{ICommand, IContextCommand};
 use super::super::Context;
+use super::{ICommand, IContextCommand};
 
-use kernel::windows_kernel::{kernel, ansi_support};
+use kernel::windows_kernel::{ansi_support, kernel};
+use std::mem;
 use winapi::shared::minwindef::DWORD;
 use winapi::um::wincon;
-use winapi::um::wincon::{ENABLE_VIRTUAL_TERMINAL_PROCESSING ,SMALL_RECT, COORD, CHAR_INFO};
-use std::mem;
+use winapi::um::wincon::{CHAR_INFO, COORD, ENABLE_VIRTUAL_TERMINAL_PROCESSING, SMALL_RECT};
 
 /// This command is used for enabling and disabling ANSI code support for windows systems,
 /// For more info check: https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences.
 #[derive(Clone, Copy)]
-pub struct EnableAnsiCommand
-{
-    mask:  DWORD,
+pub struct EnableAnsiCommand {
+    mask: DWORD,
 }
 
-impl ICommand for EnableAnsiCommand
-{
+impl ICommand for EnableAnsiCommand {
     fn new() -> Box<EnableAnsiCommand> {
         let key = super::generate_key();
-        let command = EnableAnsiCommand { mask: ENABLE_VIRTUAL_TERMINAL_PROCESSING };
+        let command = EnableAnsiCommand {
+            mask: ENABLE_VIRTUAL_TERMINAL_PROCESSING,
+        };
         Box::from(command)
     }
 
-    fn execute(&mut self) -> bool
-    {
+    fn execute(&mut self) -> bool {
         // we need to check whether we tried to enable ansi before. If we have we can just return if that had succeeded.
-        if ansi_support::has_been_tried_to_enable_ansi() && ansi_support::ansi_enabled()
-            {
-                return ansi_support::windows_supportable();
-
-            } else {
+        if ansi_support::has_been_tried_to_enable_ansi() && ansi_support::ansi_enabled() {
+            return ansi_support::windows_supportable();
+        } else {
             let output_handle = kernel::get_output_handle();
 
             let mut dw_mode: DWORD = 0;
-            if !kernel::get_console_mode(&output_handle, &mut dw_mode)
-                {
-                    return false;
-                }
+            if !kernel::get_console_mode(&output_handle, &mut dw_mode) {
+                return false;
+            }
 
             dw_mode |= self.mask;
-            if !kernel::set_console_mode(&output_handle, dw_mode)
-                {
-                    return false;
-                }
+            if !kernel::set_console_mode(&output_handle, dw_mode) {
+                return false;
+            }
 
             return true;
         }
     }
 
-    fn undo(&mut self) -> bool
-    {
-        if ansi_support::ansi_enabled()
-        {
+    fn undo(&mut self) -> bool {
+        if ansi_support::ansi_enabled() {
             let output_handle = kernel::get_output_handle();
 
             let mut dw_mode: DWORD = 0;
-            if !kernel::get_console_mode(&output_handle, &mut dw_mode)
-                {
-                    return false;
-                }
+            if !kernel::get_console_mode(&output_handle, &mut dw_mode) {
+                return false;
+            }
 
             dw_mode &= !self.mask;
-            if !kernel::set_console_mode(&output_handle, dw_mode)
-            {
+            if !kernel::set_console_mode(&output_handle, dw_mode) {
                 return false;
             }
 
@@ -78,59 +69,57 @@ impl ICommand for EnableAnsiCommand
 /// This command is used for enabling and disabling raw mode for windows systems.
 /// For more info check: https://docs.microsoft.com/en-us/windows/console/high-level-console-modes.
 #[derive(Clone, Copy)]
-pub struct EnableRawModeCommand
-{
+pub struct EnableRawModeCommand {
     mask: DWORD,
-    key: i16
+    key: i16,
 }
 
-impl IContextCommand for EnableRawModeCommand
-{
+impl IContextCommand for EnableRawModeCommand {
     fn new(context: &mut Context) -> (Box<EnableRawModeCommand>, i16) {
-        use self::wincon::{ENABLE_LINE_INPUT,ENABLE_PROCESSED_INPUT, ENABLE_PROCESSED_OUTPUT, ENABLE_WRAP_AT_EOL_OUTPUT, ENABLE_ECHO_INPUT};
+        use self::wincon::{
+            ENABLE_ECHO_INPUT, ENABLE_LINE_INPUT, ENABLE_PROCESSED_INPUT, ENABLE_PROCESSED_OUTPUT,
+            ENABLE_WRAP_AT_EOL_OUTPUT,
+        };
 
         let key = super::generate_key();
-        let command = EnableRawModeCommand { mask: ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT  | ENABLE_ECHO_INPUT, key: key };
+        let command = EnableRawModeCommand {
+            mask: ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT | ENABLE_ECHO_INPUT,
+            key: key,
+        };
         context.register_change(Box::from(command), key);
-        (Box::from(command),key)
+        (Box::from(command), key)
     }
 
-    fn execute(&mut self) -> bool
-    {
-        use self::wincon::{ENABLE_LINE_INPUT,ENABLE_PROCESSED_INPUT, ENABLE_ECHO_INPUT};
+    fn execute(&mut self) -> bool {
+        use self::wincon::{ENABLE_ECHO_INPUT, ENABLE_LINE_INPUT, ENABLE_PROCESSED_INPUT};
 
         let input_handle = kernel::get_input_handle();
 
         let mut dw_mode: DWORD = 0;
-        if !kernel::get_console_mode(&input_handle, &mut dw_mode)
-        {
+        if !kernel::get_console_mode(&input_handle, &mut dw_mode) {
             return false;
         }
 
         let new_mode = dw_mode & !self.mask;
 
-        if !kernel::set_console_mode(&input_handle, new_mode)
-        {
+        if !kernel::set_console_mode(&input_handle, new_mode) {
             return false;
         }
 
         true
     }
 
-    fn undo(&mut self) -> bool
-    {
+    fn undo(&mut self) -> bool {
         let output_handle = kernel::get_output_handle();
 
         let mut dw_mode: DWORD = 0;
-        if !kernel::get_console_mode(&output_handle, &mut dw_mode)
-        {
+        if !kernel::get_console_mode(&output_handle, &mut dw_mode) {
             return false;
         }
 
         let new_mode = dw_mode | self.mask;
 
-        if !kernel::set_console_mode(&output_handle, new_mode)
-        {
+        if !kernel::set_console_mode(&output_handle, new_mode) {
             return false;
         }
 
@@ -143,16 +132,13 @@ impl IContextCommand for EnableRawModeCommand
 #[derive(Clone, Copy)]
 pub struct ToAlternateScreenBufferCommand;
 
-impl ICommand for ToAlternateScreenBufferCommand
-{
-    fn new() -> Box<ToAlternateScreenBufferCommand>
-    {
+impl ICommand for ToAlternateScreenBufferCommand {
+    fn new() -> Box<ToAlternateScreenBufferCommand> {
         Box::from(ToAlternateScreenBufferCommand {})
     }
 
-    fn execute(&mut self) -> bool
-    {
-        let mut chi_buffer: [CHAR_INFO;160] = unsafe {mem::zeroed() };
+    fn execute(&mut self) -> bool {
+        let mut chi_buffer: [CHAR_INFO; 160] = unsafe { mem::zeroed() };
 
         let handle = kernel::get_output_handle();
 
@@ -163,35 +149,31 @@ impl ICommand for ToAlternateScreenBufferCommand
         kernel::set_active_screen_buffer(new_handle);
 
         // Set the source rectangle.
-        let mut srct_read_rect = SMALL_RECT
-        {
+        let mut srct_read_rect = SMALL_RECT {
             Top: 0,
-            Left: 0 ,
+            Left: 0,
             Bottom: 1,
             Right: 79,
         };
 
         // The temporary buffer size is 2 rows x 80 columns.
-        let coord_buffer_size = COORD
-        {
-            X: 2,
-            Y: 80
-        };
+        let coord_buffer_size = COORD { X: 2, Y: 80 };
 
         // The top left destination cell of the temporary buffer is
         // row 0, col 0.
-        let coord_buffer_coord = COORD
-        {
-            X: 0,
-            Y: 0,
-        };
+        let coord_buffer_coord = COORD { X: 0, Y: 0 };
 
         // Copy the block from the screen buffer to the temp. buffer.
-        kernel::read_console_output(&handle, &mut chi_buffer, coord_buffer_size, coord_buffer_coord, &mut srct_read_rect);
+        kernel::read_console_output(
+            &handle,
+            &mut chi_buffer,
+            coord_buffer_size,
+            coord_buffer_coord,
+            &mut srct_read_rect,
+        );
 
         // Set the destination rectangle.
-        let mut srct_write_rect = SMALL_RECT
-        {
+        let mut srct_write_rect = SMALL_RECT {
             Top: 10,
             Left: 0,
             Bottom: 11,
@@ -199,13 +181,18 @@ impl ICommand for ToAlternateScreenBufferCommand
         };
 
         // Copy from the temporary buffer to the new screen buffer.
-        kernel::write_console_output(&new_handle, &mut chi_buffer, coord_buffer_size, coord_buffer_coord, &mut srct_write_rect);
+        kernel::write_console_output(
+            &new_handle,
+            &mut chi_buffer,
+            coord_buffer_size,
+            coord_buffer_coord,
+            &mut srct_write_rect,
+        );
 
         true
     }
 
-    fn undo(&mut self) -> bool
-    {
+    fn undo(&mut self) -> bool {
         let handle = kernel::get_output_handle();
         kernel::set_active_screen_buffer(handle);
         true

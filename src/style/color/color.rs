@@ -3,11 +3,11 @@
 
 use super::*;
 use shared::functions;
-use { Construct, Context };
 use style::{Color, ObjectStyle, StyledObject};
+use {Construct, Context};
 
 use std::ops::Drop;
-use std::{ fmt, io };
+use std::{fmt, io};
 
 /// Struct that stores an specific platform implementation for color related actions.
 pub struct TerminalColor {
@@ -18,12 +18,15 @@ impl TerminalColor {
     /// Create new instance whereon color related actions can be performed.
     pub fn new() -> TerminalColor {
         #[cfg(target_os = "windows")]
-        let color = functions::get_module::<Box<ITerminalColor>>(WinApiColor::new(), AnsiColor::new());
+        let color =
+            functions::get_module::<Box<ITerminalColor>>(WinApiColor::new(), AnsiColor::new());
 
         #[cfg(not(target_os = "windows"))]
         let color = Some(AnsiColor::new() as Box<ITerminalColor>);
 
-        TerminalColor { terminal_color: color }
+        TerminalColor {
+            terminal_color: color,
+        }
     }
 
     /// Set the foreground color to the given color.
@@ -37,7 +40,7 @@ impl TerminalColor {
     ///
     /// // Get colored terminal instance
     /// let mut colored_terminal = color();
-    /// 
+    ///
     /// // Set foreground color of the font
     /// colored_terminal.set_fg(Color::Red);
     /// // crossterm provides to set the background from &str or String
@@ -62,7 +65,7 @@ impl TerminalColor {
     ///
     /// // Get colored terminal instance
     /// let mut colored_terminal = color();
-    /// 
+    ///
     /// // Set background color of the font
     /// colored_terminal.set_bg(Color::Red);
     /// // crossterm provides to set the background from &str or String
@@ -85,7 +88,7 @@ impl TerminalColor {
     ///
     /// // Get colored terminal instance
     /// let mut colored_terminal = color();
-    /// 
+    ///
     /// colored_terminal.reset();
     ///
     /// ```
@@ -96,10 +99,9 @@ impl TerminalColor {
     }
 
     /// Get available color count.
-    pub fn get_available_color_count(&self) -> io::Result<u16>
-    {
+    pub fn get_available_color_count(&self) -> io::Result<u16> {
         use std::env;
-        
+
         Ok(match env::var_os("TERM") {
             Some(val) => {
                 if val.to_str().unwrap_or("").contains("256color") {
@@ -121,7 +123,7 @@ impl TerminalColor {
 /// extern crate crossterm;
 ///
 /// use self::crossterm::style::{color, Color};
-/// 
+///
 /// // Get colored terminal instance
 /// let mut colored_terminal = color();
 ///
@@ -137,7 +139,7 @@ pub fn color() -> Box<TerminalColor> {
 /// Wraps an displayable object so it can be formatted with colors and attributes.
 ///
 /// Check `/examples/color` in the libary for more spesific examples.
-/// 
+///
 /// #Example
 ///
 /// ```rust
@@ -147,11 +149,11 @@ pub fn color() -> Box<TerminalColor> {
 ///
 /// fn main()
 /// {
-///     // Create an styledobject object from the text 'Unstyled font' 
+///     // Create an styledobject object from the text 'Unstyled font'
 ///     // Currently it has the default foregroundcolor and backgroundcolor.
 ///     println!("{}",paint("Unstyled font"));
 ///
-///     // Create an displayable object from the text 'Colored font', 
+///     // Create an displayable object from the text 'Colored font',
 ///     // Paint this with the `Red` foreground color and `Blue` backgroundcolor.
 ///     // Print the result.
 ///     let styledobject = paint("Colored font").with(Color::Red).on(Color::Blue);
@@ -167,5 +169,3 @@ where
 {
     ObjectStyle::new().apply_to(val)
 }
-
-

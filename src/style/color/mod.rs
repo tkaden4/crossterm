@@ -1,12 +1,12 @@
 pub mod color;
 
+mod ansi_color;
 #[cfg(target_os = "windows")]
 mod winapi_color;
-mod ansi_color;
 
+use self::ansi_color::AnsiColor;
 #[cfg(target_os = "windows")]
 use self::winapi_color::WinApiColor;
-use self::ansi_color::AnsiColor;
 use super::{Color, ColorType};
 
 ///! This trait defines the actions that can be preformed with the terminal color.

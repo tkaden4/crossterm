@@ -12,11 +12,12 @@ pub struct Terminal {
     terminal: Option<Box<ITerminal>>,
 }
 
-impl  Terminal {
+impl Terminal {
     /// Create new terminal instance whereon terminal related actions can be performed.
     pub fn new() -> Terminal {
         #[cfg(target_os = "windows")]
-        let terminal = functions::get_module::<Box<ITerminal>>(WinApiTerminal::new(), AnsiTerminal::new());
+        let terminal =
+            functions::get_module::<Box<ITerminal>>(WinApiTerminal::new(), AnsiTerminal::new());
 
         #[cfg(not(target_os = "windows"))]
         let terminal = Some(AnsiTerminal::new() as Box<ITerminal>);
@@ -25,7 +26,7 @@ impl  Terminal {
     }
 
     /// Clear the current cursor by specifying the clear type
-    /// 
+    ///
     /// #Example
     ///
     /// ```rust
@@ -34,7 +35,7 @@ impl  Terminal {
     /// use crossterm::terminal;
     ///
     /// let mut term = terminal::terminal();
-    /// 
+    ///
     /// // clear all cells in terminal.
     /// term.clear(terminal::ClearType::All);
     /// // clear all cells from the cursor position downwards in terminal.
@@ -45,7 +46,7 @@ impl  Terminal {
     /// term.clear(terminal::ClearType::CurrentLine);
     /// // clear all cells from cursor position until new line in terminal.
     /// term.clear(terminal::ClearType::UntilNewLine);
-    /// 
+    ///
     /// ```
     pub fn clear(&mut self, clear_type: ClearType) {
         if let Some(ref terminal) = self.terminal {
@@ -54,7 +55,7 @@ impl  Terminal {
     }
 
     /// Get the terminal size (x,y).
-    /// 
+    ///
     /// #Example
     ///
     /// ```rust
@@ -66,17 +67,17 @@ impl  Terminal {
     ///
     /// let size = term.terminal_size();
     /// println!("{:?}", size);
-    /// 
+    ///
     /// ```
     pub fn terminal_size(&mut self) -> (u16, u16) {
         if let Some(ref terminal) = self.terminal {
-            return terminal.terminal_size()
+            return terminal.terminal_size();
         }
-        (0,0)
+        (0, 0)
     }
 
     /// Scroll `n` lines up in the current terminal.
-    /// 
+    ///
     /// #Example
     ///
     /// ```rust
@@ -85,10 +86,10 @@ impl  Terminal {
     /// use crossterm::terminal;
     ///
     /// let mut term = terminal::terminal();
-    /// 
+    ///
     /// // scroll up by 5 lines
     /// let size = term.scroll_up(5);
-    /// 
+    ///
     /// ```
     pub fn scroll_up(&mut self, count: i16) {
         if let Some(ref terminal) = self.terminal {
@@ -97,7 +98,7 @@ impl  Terminal {
     }
 
     /// Scroll `n` lines up in the current terminal.
-    /// 
+    ///
     /// #Example
     ///
     /// ```rust
@@ -106,10 +107,10 @@ impl  Terminal {
     /// use crossterm::terminal;
     ///
     /// let mut term = terminal::terminal();
-    /// 
+    ///
     /// // scroll down by 5 lines
     /// let size = term.scroll_down(5);
-    /// 
+    ///
     /// ```
     pub fn scroll_down(&mut self, count: i16) {
         if let Some(ref terminal) = self.terminal {
@@ -127,15 +128,14 @@ impl  Terminal {
     /// use crossterm::terminal;
     ///
     /// let mut term = terminal::terminal();
-    /// 
+    ///
     /// // Set of the size to X: 10 and Y: 10
     /// let size = term.set_size(10,10);
-    /// 
+    ///
     /// ```
-    pub fn set_size(&mut self, width: i16, height: i16)
-    {
-        if let Some (ref terminal) = self.terminal {
-            terminal.set_size(width,height);
+    pub fn set_size(&mut self, width: i16, height: i16) {
+        if let Some(ref terminal) = self.terminal {
+            terminal.set_size(width, height);
         }
     }
 }
@@ -158,7 +158,6 @@ impl  Terminal {
 ///
 /// ```
 ///
-pub fn terminal() -> Box<Terminal>
-{
+pub fn terminal() -> Box<Terminal> {
     Box::from(Terminal::new())
 }
