@@ -79,13 +79,11 @@ pub fn get_console_screen_buffer_info() -> CONSOLE_SCREEN_BUFFER_INFO {
 
 pub fn get_largest_console_window_size() -> COORD {
     let output_handle = get_output_handle();
-
     unsafe { GetLargestConsoleWindowSize(output_handle) }
 }
 
 pub fn get_original_console_color() -> u16 {
-    let console_buffer_info = get_console_screen_buffer_info();
-    console_buffer_info.wAttributes as u16
+    get_console_screen_buffer_info().wAttributes as u16
 }
 
 pub fn set_console_mode(handle: &HANDLE, console_mode: u32) -> bool {
