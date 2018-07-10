@@ -27,7 +27,7 @@ impl ICommand for EnableAnsiCommand {
 
     fn execute(&mut self) -> bool {
         // we need to check whether we tried to enable ansi before. If we have we can just return if that had succeeded.
-        if ansi_support::has_been_tried_to_enable_ansi() && ansi_support::ansi_enabled() {
+        if ansi_support::has_been_tried_to_enable() && ansi_support::ansi_enabled() {
             return ansi_support::windows_supportable();
         } else {
             let output_handle = kernel::get_output_handle();
