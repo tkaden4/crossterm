@@ -189,20 +189,20 @@ pub fn create_console_screen_buffer() -> HANDLE {
     use winapi::um::winnt::{FILE_SHARE_READ, FILE_SHARE_WRITE, GENERIC_READ, GENERIC_WRITE};
 
     unsafe {
-        let mut security_attr: SECURITY_ATTRIBUTES = SECURITY_ATTRIBUTES {
+        let mut security_attr = SECURITY_ATTRIBUTES {
             nLength: size_of::<SECURITY_ATTRIBUTES>() as u32,
             lpSecurityDescriptor: NULL,
             bInheritHandle: TRUE,
         };
 
         let new_screen_buffer = CreateConsoleScreenBuffer(
-            GENERIC_READ |           // read/write access
-                GENERIC_WRITE,
+            GENERIC_READ | GENERIC_WRITE,       // read/write access
             FILE_SHARE_READ | FILE_SHARE_WRITE, // shared
             &mut security_attr,                 // default security attributes
             CONSOLE_TEXTMODE_BUFFER,            // must be TEXTMODE
             NULL,
         );
+
         new_screen_buffer
     }
 }

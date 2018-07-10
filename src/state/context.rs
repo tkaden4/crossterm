@@ -6,7 +6,7 @@ use std::ops::Drop;
 
 /// Struct that stores the changed states of the terminal.
 pub struct Context {
-    changed_states: HashMap<i16, (Box<IContextCommand>)>,
+    changed_states: HashMap<i16, Box<IContextCommand>>,
 }
 
 impl Context {

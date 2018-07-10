@@ -17,7 +17,7 @@ pub struct EnableAnsiCommand {
 }
 
 impl ICommand for EnableAnsiCommand {
-    fn new() -> Box<EnableAnsiCommand> {
+    fn new() -> Box<Self> {
         let key = super::generate_key();
         let command = EnableAnsiCommand {
             mask: ENABLE_VIRTUAL_TERMINAL_PROCESSING,
@@ -28,21 +28,18 @@ impl ICommand for EnableAnsiCommand {
     fn execute(&mut self) -> bool {
         // we need to check whether we tried to enable ansi before. If we have we can just return if that had succeeded.
         if ansi_support::has_been_tried_to_enable() && ansi_support::ansi_enabled() {
-            return ansi_support::windows_supportable();
+            ansi_support::windows_supportable()
         } else {
             let output_handle = kernel::get_output_handle();
-
             let mut dw_mode: DWORD = 0;
+
             if !kernel::get_console_mode(&output_handle, &mut dw_mode) {
                 return false;
             }
 
             dw_mode |= self.mask;
-            if !kernel::set_console_mode(&output_handle, dw_mode) {
-                return false;
-            }
 
-            return true;
+            kernel::set_console_mode(&output_handle, dw_mode)
         }
     }
 
@@ -71,28 +68,21 @@ impl ICommand for EnableAnsiCommand {
 #[derive(Clone, Copy)]
 pub struct EnableRawModeCommand {
     mask: DWORD,
-    key: i16,
 }
 
 impl IContextCommand for EnableRawModeCommand {
     fn new(context: &mut Context) -> (Box<EnableRawModeCommand>, i16) {
-        use self::wincon::{
-            ENABLE_ECHO_INPUT, ENABLE_LINE_INPUT, ENABLE_PROCESSED_INPUT, ENABLE_PROCESSED_OUTPUT,
-            ENABLE_WRAP_AT_EOL_OUTPUT,
-        };
+        use self::wincon::{ENABLE_ECHO_INPUT, ENABLE_LINE_INPUT, ENABLE_PROCESSED_INPUT};
 
         let key = super::generate_key();
         let command = EnableRawModeCommand {
             mask: ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT | ENABLE_ECHO_INPUT,
-            key: key,
         };
         context.register_change(Box::from(command), key);
         (Box::from(command), key)
     }
 
     fn execute(&mut self) -> bool {
-        use self::wincon::{ENABLE_ECHO_INPUT, ENABLE_LINE_INPUT, ENABLE_PROCESSED_INPUT};
-
         let input_handle = kernel::get_input_handle();
 
         let mut dw_mode: DWORD = 0;
@@ -100,13 +90,9 @@ impl IContextCommand for EnableRawModeCommand {
             return false;
         }
 
-        let new_mode = dw_mode & !self.mask;
+        dw_mode &= !self.mask;
 
-        if !kernel::set_console_mode(&input_handle, new_mode) {
-            return false;
-        }
-
-        true
+        kernel::set_console_mode(&input_handle, dw_mode)
     }
 
     fn undo(&mut self) -> bool {
@@ -117,13 +103,9 @@ impl IContextCommand for EnableRawModeCommand {
             return false;
         }
 
-        let new_mode = dw_mode | self.mask;
+        dw_mode |= self.mask;
 
-        if !kernel::set_console_mode(&output_handle, new_mode) {
-            return false;
-        }
-
-        true
+        kernel::set_console_mode(&output_handle, dw_mode)
     }
 }
 

@@ -46,8 +46,8 @@ pub fn pos() -> (u16, u16) {
 
     let mut context = Context::new();
     {
-        let mut command = NoncanonicalModeCommand::new(&mut context);
-        command.0.execute();
+        let mut (command, _) = NoncanonicalModeCommand::new(&mut context);
+        command.execute();
 
         // This code is original written by term_cursor credits to them.
         let mut stdout = io::stdout();
@@ -95,13 +95,11 @@ pub fn pos() -> (u16, u16) {
         let (cols, c) = read_num();
 
         // Expect `R`
-        let res = if c == 'R' {
+        if c == 'R' {
             (cols as u16, rows as u16)
         } else {
-            return (0, 0);
-        };
-
-        res
+            (0, 0);
+        }
     }
 }
 
@@ -128,8 +126,8 @@ pub fn get_terminal_mode() -> io::Result<Termios> {
     }
     unsafe {
         let mut termios = mem::zeroed();
-        is_true(tcgetattr(0, &mut termios))?;
-        Ok(termios)
+        is_true(tcgetattr(0, &mut termios))
+            .map(|_| termios)
     }
 }
 
