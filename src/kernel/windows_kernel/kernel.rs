@@ -56,25 +56,19 @@ pub fn get_input_handle() -> HANDLE {
 
 /// Checks if the console handle is an invalid handle value.
 pub fn is_valid_handle(handle: &HANDLE) -> bool {
-    if *handle == INVALID_HANDLE_VALUE {
-        false
-    } else {
-        true
-    }
+    *handle != INVALID_HANDLE_VALUE
 }
 
 pub fn get_console_screen_buffer_info() -> CONSOLE_SCREEN_BUFFER_INFO {
     let output_handle = get_output_handle();
     let mut csbi = CONSOLE_SCREEN_BUFFER_INFO::empty();
-    let success;
-
-    unsafe { success = GetConsoleScreenBufferInfo(output_handle, &mut csbi) }
-
-    if success == 0 {
-        panic!("Cannot get console screen buffer info");
+    unsafe {
+        let success = GetConsoleScreenBufferInfo(output_handle, &mut csbi);
+        if success == 0 {
+            panic!("Cannot get console screen buffer info");
+        }
+        csbi
     }
-
-    csbi
 }
 
 pub fn get_largest_console_window_size() -> COORD {
@@ -89,23 +83,23 @@ pub fn get_original_console_color() -> u16 {
 pub fn set_console_mode(handle: &HANDLE, console_mode: u32) -> bool {
     unsafe {
         let success = SetConsoleMode(*handle, console_mode);
-        return is_true(success);
+        is_true(success)
     }
 }
 
 pub fn get_console_mode(handle: &HANDLE, current_mode: &mut u32) -> bool {
     unsafe {
         let success = GetConsoleMode(*handle, &mut *current_mode);
-        return is_true(success);
+        is_true(success)
     }
 }
 
 pub fn set_console_cursor_position(x: i16, y: i16) {
-    if x < 0 || x >= <i16>::max_value() {
+    if x < 0 {
         panic!("X: {}, Argument Out of Range Exception", x);
     }
 
-    if y < 0 || y >= <i16>::max_value() {
+    if y < 0 {
         panic!("Y: {}, Argument Out of Range Exception", y);
     }
 
@@ -114,7 +108,6 @@ pub fn set_console_cursor_position(x: i16, y: i16) {
 
     unsafe {
         let success = SetConsoleCursorPosition(output_handle, position);
-
         if success == 0 {
             panic!("Argument out of range.");
         }
@@ -123,7 +116,6 @@ pub fn set_console_cursor_position(x: i16, y: i16) {
 
 pub fn set_console_text_attribute(value: u16) {
     let output_handle = get_output_handle();
-
     unsafe {
         SetConsoleTextAttribute(output_handle, value);
     }
@@ -131,7 +123,6 @@ pub fn set_console_text_attribute(value: u16) {
 
 pub fn set_console_info(absolute: bool, rect: &SMALL_RECT) -> bool {
     let output_handle = get_output_handle();
-
     let absolute = match absolute {
         true => 1,
         false => 0,
@@ -144,7 +135,6 @@ pub fn set_console_info(absolute: bool, rect: &SMALL_RECT) -> bool {
 
 pub fn set_console_screen_buffer_size(size: COORD) -> bool {
     let output_handle = get_output_handle();
-
     unsafe {
         let success = SetConsoleScreenBufferSize(output_handle, size);
         is_true(success)
@@ -157,7 +147,6 @@ pub fn fill_console_output_character(
     cells_to_write: u32,
 ) -> bool {
     let output_handle = get_output_handle();
-
     unsafe {
         // fill the cells in console with blanks
         let success = FillConsoleOutputCharacterA(
@@ -179,20 +168,16 @@ pub fn fill_console_output_attribute(
     // Get the position of the current console window
     let csbi = get_console_screen_buffer_info();
     let output_handle = get_output_handle();
-
-    let success;
-
     unsafe {
-        success = FillConsoleOutputAttribute(
+        let success = FillConsoleOutputAttribute(
             output_handle,
             csbi.wAttributes,
             cells_to_write,
             start_location,
             cells_written,
         );
+        is_true(success)
     }
-
-    is_true(success)
 }
 
 pub fn create_console_screen_buffer() -> HANDLE {
@@ -278,10 +263,7 @@ pub fn write_console_output(
 }
 
 /// Parse integer to an bool
+#[inline]
 fn is_true(value: i32) -> bool {
-    if value == 0 {
-        return false;
-    } else {
-        return true;
-    }
+    value != 0
 }
